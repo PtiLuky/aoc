@@ -1,14 +1,17 @@
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::fs::File;
+use std::time::Instant;
 
 // Error handling policy : I trust the input file, so I unwrap everything with joy and recklessness :)
 
+#[allow(dead_code)]
 fn correctness_v1(pwd: &str, letter: &str, min: usize, max: usize) -> bool {
     let letter_count = pwd.matches(letter).count();
     letter_count >= min && letter_count <= max
 }
 
+#[allow(dead_code)]
 fn correctness_v2(pwd: &str, letter: char, pos1: usize, pos2: usize) -> bool {
     let char1_ok = pwd.chars().nth(pos1).unwrap() == letter;
     let char2_ok = pwd.chars().nth(pos2).unwrap() == letter;
@@ -34,6 +37,8 @@ fn is_line_correct(line : &str) -> bool {
 }
 
 fn main(){
+    let start = Instant::now();
+
     let f = File::open("input.txt").unwrap();
     let f = BufReader::new(f);
 
@@ -45,4 +50,7 @@ fn main(){
     }
 
     println!("{}", pwd_ok_cnt);
+    
+    let duration = start.elapsed();
+    println!("Finished after {:?}", duration);
 }
