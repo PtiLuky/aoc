@@ -4,7 +4,7 @@ use std::fs::File;
 use std::time::Instant;
 
 /// TYPES /////////////////////////////////////////////////////////////////////
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 enum Instr {
     Nope(i32), // No Op
     Acc(i32),  // Increase/decrease global var Accumulator 
@@ -29,26 +29,6 @@ fn exec_instr(cpu: &mut Cpu) -> usize {
     cpu.cir
 }
 
-fn read_input(path: &str) -> Program {
-    let mut prog = Program::new();
-    
-    let f = File::open(path).unwrap();
-    let f = BufReader::new(f);
-    for line in f.lines() {
-        let line = line.unwrap();
-        let mut ite_line = line.split(" ");
-        let instr_type   = ite_line.next().unwrap();
-        let val1         = ite_line.next().unwrap().parse::<i32>().unwrap();
-        let instr = match instr_type {
-            "jmp" => Instr::Jump(val1),
-            "acc" => Instr::Acc(val1),
-            _ => Instr::Nope(val1)
-        };
-        prog.push(instr);
-    }
-    prog
-}
-
 fn run_stop_on_repeat(cpu: &mut Cpu) -> (i32, bool) {
     let mut instr_exec : Vec<bool> = vec![false; cpu.prog.len()];
     let mut prev_acc = 0;
@@ -62,7 +42,7 @@ fn run_stop_on_repeat(cpu: &mut Cpu) -> (i32, bool) {
     (prev_acc, finished)
 }
 
-fn permut_jump_nop(prog: &mut Program, i : usize) {
+fn permut_jump_nop(prog: &mut Program, i: usize) {
     match prog[i] {
         Instr::Nope(v) => {prog[i] = Instr::Jump(v);},
         Instr::Jump(v) => {prog[i] = Instr::Nope(v);},
@@ -84,7 +64,7 @@ fn find_corruption(cpu: &mut Cpu) -> i32 {
     cpu.accumulator
 }
 
-/// MAIN //////////////////////////////////////////////////////////////////////
+/// MAIN and PARSE ////////////////////////////////////////////////////////////
 fn main() {
     let iter_cnt = 1000;
     let start = Instant::now();
@@ -107,4 +87,24 @@ fn main() {
     
     println!("\nLoop after acc={}, End after acc={}", acc_before_loop, acc_end);
     println!("[Time] Finished after {:?} (mean on {} iterations)\n", duration / iter_cnt, iter_cnt);
+}
+
+fn read_input(path: &str) -> Program {
+    let mut prog = Program::new();
+    
+    let f = File::open(path).unwrap();
+    let f = BufReader::new(f);
+    for line in f.lines() {
+        let line = line.unwrap();
+        let mut ite_line = line.split(" ");
+        let instr_type   = ite_line.next().unwrap();
+        let val1         = ite_line.next().unwrap().parse::<i32>().unwrap();
+        let instr = match instr_type {
+            "jmp" => Instr::Jump(val1),
+            "acc" => Instr::Acc(val1),
+            _ => Instr::Nope(val1)
+        };
+        prog.push(instr);
+    }
+    prog
 }
